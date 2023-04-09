@@ -58,4 +58,10 @@ public class PqFrontier extends PriorityQueue<Node> implements Frontier {
     public boolean contains(Node node) {
         return stateNodeMap.containsKey(node.getState().hashCode());
     }
+
+    @Override
+    public Node remove() {
+        return super.remove();
+    }
+
 }

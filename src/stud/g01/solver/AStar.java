@@ -8,6 +8,8 @@ import core.solver.algorithm.heuristic.Predictor;
 import core.solver.algorithm.searcher.AbstractSearcher;
 import core.solver.queue.Frontier;
 import core.solver.queue.Node;
+import stud.g01.problem.npuzzle.NPuzzleProblem;
+import stud.g01.problem.npuzzle.PuzzleBoard;
 
 
 public final class AStar extends AbstractSearcher {
@@ -20,7 +22,6 @@ public final class AStar extends AbstractSearcher {
     private final Set<State> forwardExplored; // 正向搜索的已探索集合
     private final Map<State, Node> stateNodeMap;
     private Problem problem;
-    private int shortestPathLength;
 
     /**
      * 构造函数
@@ -39,6 +40,7 @@ public final class AStar extends AbstractSearcher {
         this.reverseExplored = new HashSet<>();
         this.forwardExplored = new HashSet<>();
         this.stateNodeMap = new HashMap<>();
+
     }
 
     @Override
@@ -109,8 +111,8 @@ public final class AStar extends AbstractSearcher {
         stateNodeMap.put(node.getState(),node);
 
         // 对节点node进行扩展 Expansion
-        List<Node> childNodes = problem.childNodes(node, thisPredictor);
-        for (Node child : childNodes) {
+//        List<Node> childNodes = problem.childNodes(node, thisPredictor);
+        for (Node child : problem.childNodes(node, thisPredictor)) {
             nodesGenerated++;
             if (!thisExplored.contains(child.getState())) { // 如果新生成的节点（新扩展出的节点）还没有被扩展，则插入到frontier中。
                 thisFrontier.offer(child);
@@ -132,14 +134,22 @@ public final class AStar extends AbstractSearcher {
             currentNode = currentNode.getParent();
         }
 
-        // 从反向节点回溯到终点，构建路径的后半部分
+        // 从反向节点回溯到终点，构建路径的后半部分（先将反向路径反转）
+        Deque<Node> reversePath = new LinkedList<>();
         currentNode = reverseNode.getParent();
         while (currentNode != null) {
-            path.addLast(currentNode);
+            reversePath.addFirst(currentNode);
             currentNode = currentNode.getParent();
+        }
+
+        // 更新反向路径中节点的操作
+        Node previousNode = forwardNode;
+        for (Node node : reversePath) {
+            // 反转操作
+            path.addLast(NPuzzleProblem.reverseAction(previousNode,node));
+            previousNode = node;
         }
 
         return path;
     }
-
 }

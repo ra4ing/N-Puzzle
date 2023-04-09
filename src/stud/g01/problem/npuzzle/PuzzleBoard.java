@@ -86,10 +86,10 @@ public class PuzzleBoard extends State {
         return emptyRow;
     }
 
-//    public int getEmptyCol() {
-//        return emptyCol;
-//    }
-//
+    public int getEmptyCol() {
+        return emptyCol;
+    }
+
 //    public int getSize() {
 //        return size;
 //    }
@@ -111,7 +111,7 @@ public class PuzzleBoard extends State {
                 System.out.print("|");
                 int value = board[i][j];
                 if (value == 0) {
-                    System.out.print("    ");
+                    System.out.printf("%4c", '#');
                 } else {
                     System.out.printf("%4d", value);
                 }

@@ -3,6 +3,7 @@ package stud.g01.problem.npuzzle;
 import core.problem.Action;
 import core.problem.Problem;
 import core.problem.State;
+import core.solver.algorithm.heuristic.Predictor;
 import core.solver.queue.Node;
 
 import java.util.Deque;
@@ -63,10 +64,58 @@ public class NPuzzleProblem extends Problem {
         int step = 0;
         for (Node node : path) {
             System.out.println("Step " + step + ":");
-//            node.getAction().draw();
+            if (node.getAction() != null)  node.getAction().draw();
             node.getState().draw();
             step++;
         }
+    }
+
+//    public static Node reverseAction(Node node) {
+//        Move action = (Move) node.getAction();
+//        if (action != null) {
+//            if (action.getDirection().symbol() == '↑') {
+//                return new Node(node.getState(),node.getParent(),new Move(Direction.S),node.getPathCost());
+//            } else
+//            if (action.getDirection().symbol() == '→') {
+//                return new Node(node.getState(),node.getParent(),new Move(Direction.W),node.getPathCost());
+//            } else
+//            if (action.getDirection().symbol() == '↓') {
+//                return new Node(node.getState(),node.getParent(),new Move(Direction.N),node.getPathCost());
+//            } else
+//            if (action.getDirection().symbol() == '←') {
+//                return new Node(node.getState(),node.getParent(),new Move(Direction.E),node.getPathCost());
+//            }
+//        }
+//        return node;
+//    }
+
+    public static Node reverseAction(Node previousNode, Node currentNode) {
+
+        if (currentNode.getAction() != null) {
+            // 获取前一个节点和当前节点的空格位置
+            PuzzleBoard previousState = (PuzzleBoard) previousNode.getState();
+            PuzzleBoard currentState = (PuzzleBoard) currentNode.getState();
+            int prevEmptyRow = previousState.getEmptyRow();
+            int prevEmptyCol = previousState.getEmptyCol();
+            int currentEmptyRow = currentState.getEmptyRow();
+            int currentEmptyCol = currentState.getEmptyCol();
+
+            // 根据空格位置的变化确定操作
+            if (prevEmptyRow == currentEmptyRow) {
+                if (prevEmptyCol - currentEmptyCol == 1) {
+                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.E),currentNode.getPathCost());
+                } else if (prevEmptyCol - currentEmptyCol == -1) {
+                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.W),currentNode.getPathCost());
+                }
+            } else if (prevEmptyCol == currentEmptyCol) {
+                if (prevEmptyRow - currentEmptyRow == 1) {
+                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.S),currentNode.getPathCost());
+                } else if (prevEmptyRow - currentEmptyRow == -1) {
+                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.N),currentNode.getPathCost());
+                }
+            }
+        }
+        return currentNode;
     }
 
 
