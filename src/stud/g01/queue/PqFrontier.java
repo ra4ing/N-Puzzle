@@ -10,21 +10,19 @@ import java.util.PriorityQueue;
 
 public class PqFrontier extends PriorityQueue<Node> implements Frontier {
     private final Comparator<Node> evaluator;
-//    private final Map<Integer, Node> stateNodeMap;
-    private final Node[] stateMap = new Node[1024];
+    private final Map<Integer, Node> stateNodeMap;
 
     public PqFrontier(Comparator<Node> evaluator) {
         super(evaluator);
         this.evaluator = evaluator;
-//        this.stateNodeMap = new HashMap<>();
+        this.stateNodeMap = new HashMap<>();
     }
 
     @Override
     public Node poll() {
         Node node = super.poll();
         if (node != null) {
-//            stateNodeMap.remove(node.getState().hashCode());
-            stateMap[node.getState().hashCode()] = null;
+            stateNodeMap.remove(node.getState().hashCode());
         }
         return node;
     }
