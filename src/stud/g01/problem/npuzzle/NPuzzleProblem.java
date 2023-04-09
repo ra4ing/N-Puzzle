@@ -3,7 +3,6 @@ package stud.g01.problem.npuzzle;
 import core.problem.Action;
 import core.problem.Problem;
 import core.problem.State;
-import core.solver.algorithm.heuristic.Predictor;
 import core.solver.queue.Node;
 
 import java.util.Deque;
@@ -103,15 +102,15 @@ public class NPuzzleProblem extends Problem {
             // 根据空格位置的变化确定操作
             if (prevEmptyRow == currentEmptyRow) {
                 if (prevEmptyCol - currentEmptyCol == 1) {
-                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.E),currentNode.getPathCost());
-                } else if (prevEmptyCol - currentEmptyCol == -1) {
                     return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.W),currentNode.getPathCost());
+                } else if (prevEmptyCol - currentEmptyCol == -1) {
+                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.E),currentNode.getPathCost());
                 }
             } else if (prevEmptyCol == currentEmptyCol) {
                 if (prevEmptyRow - currentEmptyRow == 1) {
-                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.S),currentNode.getPathCost());
-                } else if (prevEmptyRow - currentEmptyRow == -1) {
                     return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.N),currentNode.getPathCost());
+                } else if (prevEmptyRow - currentEmptyRow == -1) {
+                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.S),currentNode.getPathCost());
                 }
             }
         }

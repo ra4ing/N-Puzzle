@@ -9,8 +9,6 @@ import core.solver.algorithm.searcher.AbstractSearcher;
 import core.solver.queue.Frontier;
 import core.solver.queue.Node;
 import stud.g01.problem.npuzzle.NPuzzleProblem;
-import stud.g01.problem.npuzzle.PuzzleBoard;
-
 
 public final class AStar extends AbstractSearcher {
 
@@ -22,6 +20,7 @@ public final class AStar extends AbstractSearcher {
     private final Set<State> forwardExplored; // 正向搜索的已探索集合
     private final Map<State, Node> stateNodeMap;
     private Problem problem;
+    private int minIntersectionCost; // 最小交叉代价
 
     /**
      * 构造函数
@@ -40,7 +39,7 @@ public final class AStar extends AbstractSearcher {
         this.reverseExplored = new HashSet<>();
         this.forwardExplored = new HashSet<>();
         this.stateNodeMap = new HashMap<>();
-
+        this.minIntersectionCost = Integer.MAX_VALUE;
     }
 
     @Override
@@ -58,6 +57,7 @@ public final class AStar extends AbstractSearcher {
         reverseExplored.clear();
         nodesExpanded = 0;
         nodesGenerated = 0;
+        minIntersectionCost = Integer.MAX_VALUE;
 
         // 起始节点root
         Node root = problem.root(forwardPredictor);
@@ -67,14 +67,10 @@ public final class AStar extends AbstractSearcher {
         reverseFrontier.offer(goalNode);
 
         // 搜索...
-        while (true) {
-
-            if (forwardFrontier.isEmpty() && reverseFrontier.isEmpty())  // 在到达目标状态之前正反向frontier变为空，则问题无解
-                return null;
+        while (!forwardFrontier.isEmpty() || !reverseFrontier.isEmpty()) {
 
             // 从正向优先队列frontier中取出估值最小的节点
             Node forwardNode = forwardFrontier.poll();
-//            forwardNode.getState().draw();
             if (forwardNode != null) {
                 Deque<Node> forwardPath = searchHelper(forwardNode, reverseExplored, forwardExplored, forwardFrontier, forwardPredictor);
                 if (forwardPath != null) {
@@ -90,28 +86,28 @@ public final class AStar extends AbstractSearcher {
                     return reversePath;
                 }
             }
-
         }
+
+        // 如果正反向优先队列都为空，说明找不到最优解
+        return null;
     }
 
     private Deque<Node> searchHelper(Node node, Set<State> oppositeExplored, Set<State> thisExplored, Frontier thisFrontier, Predictor thisPredictor) {
         // 检查是否进入目标状态或与另一个方向的搜索相交
         if (oppositeExplored.contains(node.getState())) {
-            Node intersectingNode = null;
-            for (State oppState : oppositeExplored) {
-                if (oppState.equals(node.getState())) {
-                    intersectingNode = stateNodeMap.get(oppState);
-                    break;
-                }
+            Node intersectingNode = stateNodeMap.get(node.getState());
+            int intersectionCost = node.getPathCost() + intersectingNode.getPathCost();
+
+            if (intersectionCost < minIntersectionCost) {
+                minIntersectionCost = intersectionCost;
+                return generatePath(node, intersectingNode);
             }
-            return generatePath(node, intersectingNode);
         }
 
         thisExplored.add(node.getState());
-        stateNodeMap.put(node.getState(),node);
+        stateNodeMap.put(node.getState(), node);
 
         // 对节点node进行扩展 Expansion
-//        List<Node> childNodes = problem.childNodes(node, thisPredictor);
         for (Node child : problem.childNodes(node, thisPredictor)) {
             nodesGenerated++;
             if (!thisExplored.contains(child.getState())) { // 如果新生成的节点（新扩展出的节点）还没有被扩展，则插入到frontier中。
@@ -134,22 +130,18 @@ public final class AStar extends AbstractSearcher {
             currentNode = currentNode.getParent();
         }
 
-        // 从反向节点回溯到终点，构建路径的后半部分（先将反向路径反转）
-        Deque<Node> reversePath = new LinkedList<>();
+        // 从反向节点回溯到终点，构建路径的后半部分
         currentNode = reverseNode.getParent();
-        while (currentNode != null) {
-            reversePath.addFirst(currentNode);
-            currentNode = currentNode.getParent();
-        }
+        Node previousNode = path.peekLast();
 
-        // 更新反向路径中节点的操作
-        Node previousNode = forwardNode;
-        for (Node node : reversePath) {
+        while (currentNode != null) {
             // 反转操作
-            path.addLast(NPuzzleProblem.reverseAction(previousNode,node));
-            previousNode = node;
+            path.addLast(NPuzzleProblem.reverseAction(previousNode, currentNode));
+            previousNode = currentNode;
+            currentNode = currentNode.getParent();
         }
 
         return path;
     }
+
 }
