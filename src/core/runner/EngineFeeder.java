@@ -7,6 +7,7 @@ import core.solver.queue.EvaluationType;
 import core.solver.algorithm.heuristic.HeuristicType;
 import core.solver.algorithm.heuristic.Predictor;
 import core.solver.queue.Frontier;
+import stud.g01.solver.AStar;
 import stud.g01.solver.IDAStar;
 
 import java.util.ArrayList;
@@ -63,8 +64,21 @@ public abstract class EngineFeeder {
         // 获取Frontier，其Node以g(n)+h(n)的升序排列，相同时，按照g(n)的升序排列
         Frontier frontier = getFrontier(EvaluationType.FULL);
         // 根据frontier和predictor生成AStar引擎
-//        return new AStar(frontier, predictor);
         return new BestFirstSearcher(frontier, predictor);
+    }
+
+    public final AbstractSearcher getBiAStar(HeuristicType type) {
+        // 创建正向搜索的预测器
+        Predictor forwardPredictor = getPredictor(type);
+        // 创建反向搜索的预测器
+        Predictor reversePredictor = getPredictor(type);
+
+        // 创建正向搜索的Frontier
+        Frontier forwardFrontier = getFrontier(EvaluationType.FULL);
+        // 创建反向搜索的Frontier
+        Frontier reverseFrontier = getFrontier(EvaluationType.FULL);
+
+        return new AStar(forwardFrontier, reverseFrontier, forwardPredictor, reversePredictor);
     }
 
     /**
@@ -76,7 +90,6 @@ public abstract class EngineFeeder {
         // 获取Frontier，其Node以g(n)的升序排列
         Frontier frontier = getFrontier(EvaluationType.PATH_COST);
         // predictor：h(n)≡0，即Dijkstra算法
-//        return new AStar(frontier, (state, goal) -> 0);
         return new BestFirstSearcher(frontier, (state, goal) -> 0);
     }
 }

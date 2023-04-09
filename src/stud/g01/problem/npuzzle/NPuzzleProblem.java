@@ -63,7 +63,7 @@ public class NPuzzleProblem extends Problem {
         int step = 0;
         for (Node node : path) {
             System.out.println("Step " + step + ":");
-            node.getAction().draw();
+//            node.getAction().draw();
             node.getState().draw();
             step++;
         }

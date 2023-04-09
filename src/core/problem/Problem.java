@@ -46,6 +46,13 @@ public abstract class Problem {
         return root().setHeuristic(heuristics);
     }
 
+    public final Node goalNode(Predictor predictor) {
+        int heuristics = predictor.heuristics(goal, initialState);
+        return goalNode().setHeuristic(heuristics);
+    }
+
+    public final Node goalNode(){return new Node(goal,null,null,0);}
+
     public final Node root(){
         return new Node(initialState, null, null, 0);
     }
