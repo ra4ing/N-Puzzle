@@ -41,24 +41,17 @@ public class PuzzleFeeder extends EngineFeeder {
     }
 
     private NPuzzleProblem getNPuzzle(int[][] map, int[][]goal, int size) {
-        PuzzleBoard initialState = new PuzzleBoard(size);
-        initialState.setBoard(map);
-
-        PuzzleBoard goalState = new PuzzleBoard(size);
-        goalState.setBoard(goal);
-
-//        for (int i=0; i<size; i++) {
-//            for (int j=0; j<size; j++) {
-//                System.out.print(initialState.getBoard()[i][j] + " ");
-//            }
-//            System.out.println();
-//        }
-//        System.out.println();
+        PuzzleBoard initialState = new PuzzleBoard(size, map);
+        PuzzleBoard goalState = new PuzzleBoard(size, goal);
 
         return new NPuzzleProblem(initialState, goalState, size);
     }
 
     private int[][] getMap(String[] cells, int size, int index) {
+        return getInts(cells, size, index);
+    }
+
+    private int[][] getGoal(String[] cells, int size, int index) {
         return getInts(cells, size, index);
     }
 
@@ -72,9 +65,7 @@ public class PuzzleFeeder extends EngineFeeder {
         return map;
     }
 
-    private int[][] getGoal(String[] cells, int size, int index) {
-        return getInts(cells, size, index);
-    }
+
 
     /**
      * 生成采取某种估值机制的Frontier；与问题无关，

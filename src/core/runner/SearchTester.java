@@ -52,8 +52,8 @@ public final class SearchTester {
             //从Feeder获取所使用的搜索引擎（AStar，IDAStar等），
 
 //            solveProblems(problems, feeder.getAStar(heuristicType), heuristicType);
-//            solveProblems(problems, feeder.getIdaStar(heuristicType), heuristicType);
-            solveProblems(problems, feeder.getBiAStar(heuristicType), heuristicType);
+            solveProblems(problems, feeder.getIdaStar(heuristicType), heuristicType);
+//            solveProblems(problems, feeder.getBiAStar(heuristicType), heuristicType);
             System.out.println();
         }
     }
@@ -81,7 +81,7 @@ public final class SearchTester {
 //                heuristics.add(DISJOINT_PATTERN);
             }
             else if(step == 2) {
-                heuristics.add(DISJOINT_PATTERN);
+                heuristics.add(MANHATTAN);
             }
             //NPuzzle问题的第三阶段，使用Disjoint Pattern
             else if (step == 3) {

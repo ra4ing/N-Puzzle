@@ -6,6 +6,7 @@ public enum HeuristicType {
     MANHATTAN,  // 曼哈顿距离
     DISJOINT_PATTERN,
     EUCLID,
+    MANHATTAN_FOR_BI,
 
     //PathFinding的启发函数 (8方向的情况)
     PF_EUCLID,      // 欧几里得距离

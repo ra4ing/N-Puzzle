@@ -69,24 +69,6 @@ public class NPuzzleProblem extends Problem {
         }
     }
 
-//    public static Node reverseAction(Node node) {
-//        Move action = (Move) node.getAction();
-//        if (action != null) {
-//            if (action.getDirection().symbol() == '¡ü') {
-//                return new Node(node.getState(),node.getParent(),new Move(Direction.S),node.getPathCost());
-//            } else
-//            if (action.getDirection().symbol() == '¡ú') {
-//                return new Node(node.getState(),node.getParent(),new Move(Direction.W),node.getPathCost());
-//            } else
-//            if (action.getDirection().symbol() == '¡ý') {
-//                return new Node(node.getState(),node.getParent(),new Move(Direction.N),node.getPathCost());
-//            } else
-//            if (action.getDirection().symbol() == '¡û') {
-//                return new Node(node.getState(),node.getParent(),new Move(Direction.E),node.getPathCost());
-//            }
-//        }
-//        return node;
-//    }
 
     public static Node reverseAction(Node previousNode, Node currentNode) {
 

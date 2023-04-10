@@ -7,10 +7,12 @@ import core.solver.queue.EvaluationType;
 import core.solver.algorithm.heuristic.HeuristicType;
 import core.solver.algorithm.heuristic.Predictor;
 import core.solver.queue.Frontier;
-import stud.g01.solver.AStar;
+import stud.g01.solver.BiAStar;
 import stud.g01.solver.IDAStar;
 
 import java.util.ArrayList;
+
+import static core.solver.algorithm.heuristic.HeuristicType.MANHATTAN_FOR_BI;
 
 /**
  * 为搜索算法提供各样素材。包括
@@ -69,16 +71,16 @@ public abstract class EngineFeeder {
 
     public final AbstractSearcher getBiAStar(HeuristicType type) {
         // 创建正向搜索的预测器
-        Predictor forwardPredictor = getPredictor(type);
+        Predictor forwardPredictor = getPredictor(MANHATTAN_FOR_BI);
         // 创建反向搜索的预测器
-        Predictor reversePredictor = getPredictor(type);
+        Predictor reversePredictor = getPredictor(MANHATTAN_FOR_BI);
 
         // 创建正向搜索的Frontier
         Frontier forwardFrontier = getFrontier(EvaluationType.FULL);
         // 创建反向搜索的Frontier
         Frontier reverseFrontier = getFrontier(EvaluationType.FULL);
 
-        return new AStar(forwardFrontier, reverseFrontier, forwardPredictor, reversePredictor);
+        return new BiAStar(forwardFrontier, reverseFrontier, forwardPredictor, reversePredictor);
     }
 
     /**

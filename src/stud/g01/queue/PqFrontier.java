@@ -59,9 +59,12 @@ public class PqFrontier extends PriorityQueue<Node> implements Frontier {
         return stateNodeMap.containsKey(node.getState().hashCode());
     }
 
-    @Override
-    public Node remove() {
-        return super.remove();
+    public int getMinValue() {
+        if (isEmpty()) {
+            return Integer.MAX_VALUE;
+        }
+        return this.peek().evaluation();
     }
+
 
 }

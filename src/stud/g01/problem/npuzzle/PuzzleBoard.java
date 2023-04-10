@@ -15,13 +15,13 @@ import static core.solver.algorithm.heuristic.HeuristicType.*;
 
 public class PuzzleBoard extends State {
 
-    private int[][] board;
+    private final int[][] board;
     private final int size;
     private int emptyRow;
     private int emptyCol;
     private static final double SCALE = 1.1;
-    private int hash_code = 0;
-    private int heuristic;
+    private int hash_code = -1;
+    private int heuristic = -1;
 
     private static final int[][][][] zobristTable;
     private static final int[][][] goalTable;
@@ -59,13 +59,8 @@ public class PuzzleBoard extends State {
         }
     }
 
-    public PuzzleBoard(int size) {
+    public PuzzleBoard(int size, int[][] board) {
         this.size = size;
-        this.board = new int[size][size];
-    }
-
-
-    public void setBoard(int[][] board) {
         this.board = board;
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -77,6 +72,7 @@ public class PuzzleBoard extends State {
             }
         }
     }
+
 
     public int[][] getBoard() {
         return board;
@@ -136,9 +132,9 @@ public class PuzzleBoard extends State {
 
         int temp = board[walkRow][walkCol];
 
-        int[][] newBoard = new int[size][size];
+        int[][] newBoard = new int[size][];
         for (int i = 0; i < size; i++) {
-            System.arraycopy(board[i], 0, newBoard[i], 0, size);
+            newBoard[i] = board[i].clone();
         }
         newBoard[emptyRow][emptyCol] = temp;
         newBoard[walkRow][walkCol] = 0;
@@ -158,10 +154,7 @@ public class PuzzleBoard extends State {
 //
 //        System.out.println("--------------------------");
 
-        PuzzleBoard newPuzzleBoard = new PuzzleBoard(size);
-        newPuzzleBoard.setBoard(newBoard);
-
-        return newPuzzleBoard;
+        return new PuzzleBoard(size, newBoard);
     }
 
     /**
@@ -200,7 +193,7 @@ public class PuzzleBoard extends State {
 
     @Override
     public int hashCode() {
-        if (hash_code == 0) {
+        if (hash_code == -1) {
             int hash = 0;
             int[][][] zobristTableForSize = zobristTable[size];
 
@@ -213,7 +206,6 @@ public class PuzzleBoard extends State {
             hash_code = hash;
         }
         return hash_code;
-//        return Arrays.deepHashCode(this.board);
     }
 
     //枚举映射，存放不同类型的启发函数
@@ -224,6 +216,8 @@ public class PuzzleBoard extends State {
         predictors.put(DISJOINT_PATTERN, (state, goal) -> ((PuzzleBoard) state).disjointPattern());
         predictors.put(MISPLACED, (state, goal) -> ((PuzzleBoard) state).misplaced());
         predictors.put(EUCLID, (state, goal) -> ((PuzzleBoard) state).euclid());
+        predictors.put(MANHATTAN_FOR_BI, (state, goal) -> ((PuzzleBoard) state).manhattanForBi(goal));
+
     }
 
     public static Predictor predictor(HeuristicType type) {
@@ -257,7 +251,7 @@ public class PuzzleBoard extends State {
     }
 
     private int disjointPattern() {
-        if (heuristic == 0) {
+        if (heuristic == -1) {
             StringBuilder key1 = new StringBuilder();
             StringBuilder key2 = new StringBuilder();
 
@@ -282,7 +276,7 @@ public class PuzzleBoard extends State {
 
     //两个点之间的mis距离
     private int misplaced() {
-        if (heuristic == 0) {
+        if (heuristic == -1) {
             int misplacedTiles = 0;
             for (int row = 0; row < size; row++) {
                 for (int col = 0; col < size; col++) {
@@ -305,7 +299,7 @@ public class PuzzleBoard extends State {
 
     //两个点之间的欧几里德距离
     private int euclid() {
-        if (heuristic == 0) {
+        if (heuristic == -1) {
             double euclideanDistance = 0;
             for (int row = 0; row < size; row++) {
                 for (int col = 0; col < size; col++) {
@@ -327,7 +321,7 @@ public class PuzzleBoard extends State {
 
     //两个点之间的曼哈顿距离
     private int manhattan() {
-        if (heuristic == 0) {
+        if (heuristic == -1) {
             int manhattanDistance = 0;
 
             for (int row = 0; row < size; row++) {
@@ -345,6 +339,32 @@ public class PuzzleBoard extends State {
 
             heuristic = (int) (manhattanDistance * SCALE);
         }
+        return heuristic;
+    }
+
+    private int manhattanForBi(State goal) {
+        if (heuristic == -1) {
+            int mht = 0;
+            for (int i = 0; i < this.size; ++i) {
+                for (int j = 0; j < this.size; ++j) {
+                    if (this.board[i][j] == 0) continue;
+                    int gi = 0, gj = 0;
+                    for (boolean flag = false; gi < this.size; ++gi) {
+                        for (gj = 0; gj < this.size; ++gj) {
+                            if (((PuzzleBoard) goal).getBoard()[gi][gj] == this.board[i][j]) {
+                                flag = true;
+                                break;
+                            }
+                        }
+                        if (flag) break;
+                    }
+                    int t = ((i - gi) > 0 ? i - gi : gi - i) + ((j - gj) > 0 ? j - gj : gj - j);
+                    mht += t;
+                }
+            }
+            heuristic = mht;
+        }
+
         return heuristic;
     }
 
