@@ -77,6 +77,7 @@ public final class SearchTester {
             if (step == 1) {
 //                heuristics.add(MISPLACED);
                 heuristics.add(MANHATTAN);
+//                heuristics.add(MANLINEARCONFLICT);
 //                heuristics.add(EUCLID);
 //                heuristics.add(DISJOINT_PATTERN);
             }

@@ -8,7 +8,6 @@ import core.solver.queue.Node;
 import java.util.Deque;
 
 public class NPuzzleProblem extends Problem {
-
     private final int size;
 
 

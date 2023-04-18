@@ -7,15 +7,13 @@ import core.solver.algorithm.heuristic.Predictor;
 
 import java.util.*;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 import static core.solver.algorithm.heuristic.HeuristicType.*;
 
 public class PuzzleBoard extends State {
 
     private final int[][] board;
+    private static final int[][][] goalTable;
+    private static final int[][][][] zobristTable;
     private final int size;
     private int emptyRow;
     private int emptyCol;
@@ -23,19 +21,17 @@ public class PuzzleBoard extends State {
     private int hash_code = -1;
     private int heuristic = -1;
 
-    private static final int[][][][] zobristTable;
-    private static final int[][][] goalTable;
 
     static {
         int maxSize = 4;
-        zobristTable = new int[maxSize + 1][maxSize][maxSize][maxSize * maxSize];
+        zobristTable = new int[2][maxSize][maxSize][maxSize * maxSize];
         Random random = new Random();
 
         for (int size = 3; size <= maxSize; size++) {
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     for (int k = 0; k < size * size; k++) {
-                        zobristTable[size][i][j][k] = random.nextInt();
+                        zobristTable[size - 3][i][j][k] = random.nextInt();
                     }
                 }
             }
@@ -44,15 +40,15 @@ public class PuzzleBoard extends State {
 
     static {
         int maxSize = 4;
-        goalTable = new int[maxSize + 1][maxSize * maxSize][2];
+        goalTable = new int[2][maxSize * maxSize][2];
 
         for (int size = 3; size <= maxSize; size++) {
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     int value = i * size + j + 1;
                     if (value < size * size) {
-                        goalTable[size][value][0] = i;
-                        goalTable[size][value][1] = j;
+                        goalTable[size - 3][value][0] = i;
+                        goalTable[size - 3][value][1] = j;
                     }
                 }
             }
@@ -86,9 +82,9 @@ public class PuzzleBoard extends State {
         return emptyCol;
     }
 
-//    public int getSize() {
-//        return size;
-//    }
+    public int getSize() {
+        return size;
+    }
 
     public boolean canMove(Move move) {
         Direction direction = move.getDirection();
@@ -139,20 +135,20 @@ public class PuzzleBoard extends State {
         newBoard[emptyRow][emptyCol] = temp;
         newBoard[walkRow][walkCol] = 0;
 
-//        System.out.println(((Move) action).getDirection().symbol());
-//        for (int i = 0; i < size; i++) {
-//            for (int j = 0; j < size; j++) {
-//                System.out.print(board[i][j] + " ");
-//            }
-//            System.out.print("     ");
-//            for (int j = 0; j < size; j++) {
-//                System.out.print(newBoard[i][j] + " ");
-//            }
-//            System.out.println();
-//        }
-//        System.out.println();
-//
-//        System.out.println("--------------------------");
+        System.out.println(((Move) action).getDirection().symbol());
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                System.out.print(board[i][j] + " ");
+            }
+            System.out.print("     ");
+            for (int j = 0; j < size; j++) {
+                System.out.print(newBoard[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+
+        System.out.println("--------------------------");
 
         return new PuzzleBoard(size, newBoard);
     }
@@ -185,7 +181,6 @@ public class PuzzleBoard extends State {
 
         if (obj instanceof PuzzleBoard another) {
             return hashCode() == another.hashCode();
-//            return Arrays.deepEquals(this.board, another.getBoard());
         }
 
         return false;
@@ -195,7 +190,7 @@ public class PuzzleBoard extends State {
     public int hashCode() {
         if (hash_code == -1) {
             int hash = 0;
-            int[][][] zobristTableForSize = zobristTable[size];
+            int[][][] zobristTableForSize = zobristTable[size - 3];
 
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
@@ -213,11 +208,12 @@ public class PuzzleBoard extends State {
 
     static {
         predictors.put(MANHATTAN, (state, goal) -> ((PuzzleBoard) state).manhattan());
-        predictors.put(DISJOINT_PATTERN, (state, goal) -> ((PuzzleBoard) state).disjointPattern());
+//        predictors.put(DISJOINT_PATTERN, (state, goal) -> ((PuzzleBoard) state).disjointPattern());
+        predictors.put(MANLINEARCONFLICT, (state, goal) -> ((PuzzleBoard) state).manLinearConflict());
         predictors.put(MISPLACED, (state, goal) -> ((PuzzleBoard) state).misplaced());
         predictors.put(EUCLID, (state, goal) -> ((PuzzleBoard) state).euclid());
         predictors.put(MANHATTAN_FOR_BI, (state, goal) -> ((PuzzleBoard) state).manhattanForBi(goal));
-
+        predictors.put(NOTHING, (state, goal) -> ((PuzzleBoard) state).noHeuristic());
     }
 
     public static Predictor predictor(HeuristicType type) {
@@ -225,53 +221,22 @@ public class PuzzleBoard extends State {
     }
 
 
-    // Add this inside the PuzzleBoard class
-    private static final Map<String, Integer> patternData1 = new HashMap<>();
-    private static final Map<String, Integer> patternData2 = new HashMap<>();
-
-    static {
-        try {
-            BufferedReader reader1 = new BufferedReader(new FileReader("resources/patterns1.csv"));
-            String line;
-            while ((line = reader1.readLine()) != null) {
-                String[] tokens = line.split(",");
-                patternData1.put(String.join("", tokens).substring(0, 8), Integer.parseInt(tokens[8]));
-            }
-            reader1.close();
-
-            BufferedReader reader2 = new BufferedReader(new FileReader("resources/patterns2.csv"));
-            while ((line = reader2.readLine()) != null) {
-                String[] tokens = line.split(",");
-                patternData2.put(String.join("", tokens).substring(0, 7), Integer.parseInt(tokens[7]));
-            }
-            reader2.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private int disjointPattern() {
-        if (heuristic == -1) {
-            StringBuilder key1 = new StringBuilder();
-            StringBuilder key2 = new StringBuilder();
-
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
-                    int currentValue = board[i][j];
-                    if (currentValue >= 1 && currentValue <= 8) {
-                        key1.append(currentValue);
-                    } else if (currentValue >= 9 && currentValue <= 15) {
-                        key2.append(currentValue);
-                    }
-                }
-            }
-
-            Integer cost1 = patternData1.get(key1.toString());
-            Integer cost2 = patternData2.get(key2.toString().replaceAll("0", ""));
-            heuristic = (int) ((cost1 != null ? cost1 : 0) + (cost2 != null ? cost2 : 0) * SCALE);
-        }
-        return heuristic;
-    }
+//    static {
+//        int maxSize = 4;
+//        for (int size = 0; size <= 4; size++) {
+//            db[size] = PathFinding.puzzle3;
+//            subsets[size] = PathFinding.subsets3;
+//            positions[size] = PathFinding.positions3;
+//            classes[size] = size - 1;
+//        }
+//    }
+//
+//    private int disjointPattern() {
+//        if (heuristic == -1) {
+//
+//        }
+//        return heuristic;
+//    }
 
 
     //两个点之间的mis距离
@@ -281,8 +246,8 @@ public class PuzzleBoard extends State {
             for (int row = 0; row < size; row++) {
                 for (int col = 0; col < size; col++) {
                     int value = board[row][col];
-                    int targetRow = goalTable[size][value][0];
-                    int targetCol = goalTable[size][value][1];
+                    int targetRow = goalTable[size - 3][value][0];
+                    int targetCol = goalTable[size - 3][value][1];
 
                     if (value != 0) {
                         if ((row != targetRow || col != targetCol)) {
@@ -306,8 +271,8 @@ public class PuzzleBoard extends State {
                     int value = board[row][col];
 
                     if (value != 0) {
-                        int targetRow = goalTable[size][value][0];
-                        int targetCol = goalTable[size][value][1];
+                        int targetRow = goalTable[size - 3][value][0];
+                        int targetCol = goalTable[size - 3][value][1];
 
                         euclideanDistance += Math.sqrt(Math.pow((row - targetRow), 2) + Math.pow((col - targetCol), 2));
                     }
@@ -329,8 +294,8 @@ public class PuzzleBoard extends State {
                     int value = board[row][col];
 
                     if (value != 0) {
-                        int targetRow = goalTable[size][value][0];
-                        int targetCol = goalTable[size][value][1];
+                        int targetRow = goalTable[size - 3][value][0];
+                        int targetCol = goalTable[size - 3][value][1];
 
                         manhattanDistance += ((row - targetRow) > 0 ? row - targetRow : targetRow - row) + ((col - targetCol) > 0 ? col - targetCol : targetCol - col);
                     }
@@ -366,6 +331,42 @@ public class PuzzleBoard extends State {
         }
 
         return heuristic;
+    }
+
+    public int manLinearConflict() {
+        if (this.heuristic == -1) {
+            int heu = 0;
+            for (int row = 0; row < size; row++) {
+                for (int col = 0; col < size; col++) {
+                    int value = board[row][col];
+
+                    int targetRow = goalTable[size - 3][value][0];
+                    int targetCol = goalTable[size - 3][value][1];
+
+                    heu += Math.abs(row - targetRow) + Math.abs(col - targetCol);
+
+                    if (col < size - 1 && row == targetRow) {
+                        for (int i = 0; i < size; i++) {
+                            for (int j = 0; j < size; j++) {
+                                int otherValue = board[i][j];
+                                int otherRow = goalTable[size - 3][otherValue][0];
+                                int otherCol = goalTable[size - 3][otherValue][1];
+
+                                if (row == otherRow && col == otherCol - 1 && value > otherValue) {
+                                    heu += 2;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            this.heuristic = (int) (heu * SCALE);
+        }
+        return this.heuristic;
+    }
+
+    int noHeuristic() {
+        return 0;
     }
 
 
