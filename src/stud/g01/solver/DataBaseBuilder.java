@@ -8,7 +8,6 @@ import core.solver.algorithm.heuristic.Predictor;
 
 import core.solver.queue.Node;
 import stud.g01.problem.npuzzle.Direction;
-import stud.g01.problem.npuzzle.Move;
 import stud.g01.problem.npuzzle.NPuzzleProblem;
 import stud.g01.problem.npuzzle.PuzzleBoard;
 
@@ -33,7 +32,7 @@ public class DataBaseBuilder {
     public DataBaseBuilder() {
     }
 
-    private int[] build(Problem problem, Node root, int size) {
+    private int[] build(Node root, int size) {
         int[] cost = new int[(int) Math.pow(size * size, 4)];
         frontier.clear();
 
@@ -144,7 +143,7 @@ public class DataBaseBuilder {
         PuzzleBoard goalState1 = new PuzzleBoard(size, goalBoard1);
         Problem subProblem1 = new NPuzzleProblem(goalState1, null, size);
         Node root1 = subProblem1.root(this.predictor);
-        int[] cost1 = dpd.build(subProblem1, root1, size);
+        int[] cost1 = dpd.build(root1, size);
         dpd.save(cost1, "db3(1).txt");
 
         int[][] goalBoard2 = {
@@ -155,7 +154,7 @@ public class DataBaseBuilder {
         PuzzleBoard goalState2 = new PuzzleBoard(size, goalBoard2);
         Problem subProblem2 = new NPuzzleProblem(goalState2, null, size);
         Node root2 = subProblem2.root(this.predictor);
-        int[] cost2 = dpd.build(subProblem2, root2, size);
+        int[] cost2 = dpd.build(root2, size);
         dpd.save(cost2, "db3(2).txt");
 
         System.out.println("=========Puzzle3 Database Build Completed==========");
@@ -173,7 +172,7 @@ public class DataBaseBuilder {
         PuzzleBoard goalState1 = new PuzzleBoard(size, goalBoard1);
         Problem subProblem1 = new NPuzzleProblem(goalState1, null, size);
         Node root1 = subProblem1.root(this.predictor);
-        int[] cost1 = dpd.build(subProblem1, root1, size);
+        int[] cost1 = dpd.build(root1, size);
         dpd.save(cost1, "db4(1).txt");
         System.out.println("---------Puzzle4 Part1 Completed---------");
 
@@ -186,7 +185,7 @@ public class DataBaseBuilder {
         PuzzleBoard goalState2 = new PuzzleBoard(size, goalBoard2);
         Problem subProblem2 = new NPuzzleProblem(goalState2, null, size);
         Node root2 = subProblem2.root(this.predictor);
-        int[] cost2 = dpd.build(subProblem2, root2, size);
+        int[] cost2 = dpd.build(root2, size);
         dpd.save(cost2, "db4(2).txt");
         System.out.println("---------Puzzle4 Part2 Completed---------");
 
@@ -198,8 +197,8 @@ public class DataBaseBuilder {
         };
         PuzzleBoard goalState3 = new PuzzleBoard(size, goalBoard3);
         Problem subProblem3 = new NPuzzleProblem(goalState3, null, size);
-        Node root3 = subProblem2.root(this.predictor);
-        int[] cost3 = dpd.build(subProblem3, root3, size);
+        Node root3 = subProblem3.root(this.predictor);
+        int[] cost3 = dpd.build(root3, size);
         dpd.save(cost3, "db4(3).txt");
         System.out.println("---------Puzzle4 Part3 Completed---------");
 
