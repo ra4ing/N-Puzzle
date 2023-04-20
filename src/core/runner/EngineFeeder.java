@@ -7,6 +7,9 @@ import core.solver.queue.EvaluationType;
 import core.solver.algorithm.heuristic.HeuristicType;
 import core.solver.algorithm.heuristic.Predictor;
 import core.solver.queue.Frontier;
+import stud.g01.problem.npuzzle.DataBase;
+import stud.g01.problem.npuzzle.NPuzzleProblem;
+import stud.g01.problem.npuzzle.PuzzleBoard;
 import stud.g01.solver.BiAStar;
 import stud.g01.solver.IDAStar;
 
@@ -50,6 +53,15 @@ public abstract class EngineFeeder {
      */
     public final AbstractSearcher getIdaStar(HeuristicType type) {
         Predictor predictor = getPredictor(type);
+        // 获取Frontier，其Node以g(n)+h(n)的升序排列，相同时，按照g(n)的升序排列
+//        Frontier frontier = new StackFrontier(Node.evaluator(EvaluationType.FULL));
+        //生成IdAStar引擎（算法实例）
+        return new IDAStar(predictor);
+    }
+
+    public final AbstractSearcher getIdaStarWithDisjoint(HeuristicType type) {
+        Predictor predictor = getPredictor(type);
+        DataBase.load();
         // 获取Frontier，其Node以g(n)+h(n)的升序排列，相同时，按照g(n)的升序排列
 //        Frontier frontier = new StackFrontier(Node.evaluator(EvaluationType.FULL));
         //生成IdAStar引擎（算法实例）

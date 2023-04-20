@@ -10,18 +10,34 @@ import java.util.*;
 import static core.solver.algorithm.heuristic.HeuristicType.*;
 
 public class PuzzleBoard extends State {
-
-    private final int[][] board;
     private static final int[][][] goalTable;
     private static final int[][][][] zobristTable;
+    private static final int[] classes;
+    private static final int[][] subSets = {
+            {-1, 0, 0, 0, 0, 1, 1, 1, 1},
+            {-1, 1, 0, 0, 0, 1, 1, 2, 2, 1, 1, 2, 2, 1, 2, 2}
+    };
+    public static final int[][] positions = {
+            {-1, 0, 1, 2, 3, 0, 1, 2, 3},
+            {-1, 0, 0, 1, 2, 1, 2, 0, 1, 3, 4, 2, 3, 5, 4, 5}
+    };
+
+    public final int[][] board;
+    private int[] stateCode;
     private final int size;
     private int emptyRow;
     private int emptyCol;
-    private static final double SCALE = 1.1;
+    private static final double SCALE = 1;
     private int hash_code = -1;
     private int heuristic = -1;
 
 
+    //init classes
+    static {
+        classes = new int[]{2, 3};
+    }
+
+    // init zobristTable
     static {
         int maxSize = 4;
         zobristTable = new int[2][maxSize][maxSize][maxSize * maxSize];
@@ -38,6 +54,7 @@ public class PuzzleBoard extends State {
         }
     }
 
+    // init goalTable
     static {
         int maxSize = 4;
         goalTable = new int[2][maxSize * maxSize][2];
@@ -69,10 +86,6 @@ public class PuzzleBoard extends State {
         }
     }
 
-
-    public int[][] getBoard() {
-        return board;
-    }
 
     public int getEmptyRow() {
         return emptyRow;
@@ -135,21 +148,19 @@ public class PuzzleBoard extends State {
         newBoard[emptyRow][emptyCol] = temp;
         newBoard[walkRow][walkCol] = 0;
 
-        System.out.println(((Move) action).getDirection().symbol());
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                System.out.print(board[i][j] + " ");
-            }
-            System.out.print("     ");
-            for (int j = 0; j < size; j++) {
-                System.out.print(newBoard[i][j] + " ");
-            }
-            System.out.println();
-        }
-        System.out.println();
-
-        System.out.println("--------------------------");
-
+//        System.out.println(((Move) action).getDirection().symbol());
+//        for (int i = 0; i < size; i++) {
+//            for (int j = 0; j < size; j++) {
+//                System.out.print(board[i][j] + " ");
+//            }
+//            System.out.print("     ");
+//            for (int j = 0; j < size; j++) {
+//                System.out.print(board[i][j] + " ");
+//            }
+//            System.out.println();
+//        }
+//        System.out.println();
+//        System.out.println("--------------------------");
         return new PuzzleBoard(size, newBoard);
     }
 
@@ -208,36 +219,16 @@ public class PuzzleBoard extends State {
 
     static {
         predictors.put(MANHATTAN, (state, goal) -> ((PuzzleBoard) state).manhattan());
-//        predictors.put(DISJOINT_PATTERN, (state, goal) -> ((PuzzleBoard) state).disjointPattern());
-        predictors.put(MANLINEARCONFLICT, (state, goal) -> ((PuzzleBoard) state).manLinearConflict());
+        predictors.put(DISJOINT_PATTERN, (state, goal) -> ((PuzzleBoard) state).disjoint());
+        predictors.put(MANLINEAR_CONFLICT, (state, goal) -> ((PuzzleBoard) state).manLinearConflict());
         predictors.put(MISPLACED, (state, goal) -> ((PuzzleBoard) state).misplaced());
         predictors.put(EUCLID, (state, goal) -> ((PuzzleBoard) state).euclid());
         predictors.put(MANHATTAN_FOR_BI, (state, goal) -> ((PuzzleBoard) state).manhattanForBi(goal));
-        predictors.put(NOTHING, (state, goal) -> ((PuzzleBoard) state).noHeuristic());
     }
 
     public static Predictor predictor(HeuristicType type) {
         return predictors.get(type);
     }
-
-
-//    static {
-//        int maxSize = 4;
-//        for (int size = 0; size <= 4; size++) {
-//            db[size] = PathFinding.puzzle3;
-//            subsets[size] = PathFinding.subsets3;
-//            positions[size] = PathFinding.positions3;
-//            classes[size] = size - 1;
-//        }
-//    }
-//
-//    private int disjointPattern() {
-//        if (heuristic == -1) {
-//
-//        }
-//        return heuristic;
-//    }
-
 
     //两个点之间的mis距离
     private int misplaced() {
@@ -316,7 +307,7 @@ public class PuzzleBoard extends State {
                     int gi = 0, gj = 0;
                     for (boolean flag = false; gi < this.size; ++gi) {
                         for (gj = 0; gj < this.size; ++gj) {
-                            if (((PuzzleBoard) goal).getBoard()[gi][gj] == this.board[i][j]) {
+                            if (((PuzzleBoard) goal).board[gi][gj] == this.board[i][j]) {
                                 flag = true;
                                 break;
                             }
@@ -365,8 +356,60 @@ public class PuzzleBoard extends State {
         return this.heuristic;
     }
 
-    int noHeuristic() {
-        return 0;
+    public int disjoint() {
+        if (stateCode == null) {
+            stateCode = getStateCode();
+        }
+        return disjointPatternDataBase();
+    }
+
+    private int disjointPatternDataBase() {
+        if (this.heuristic == -1) {
+            int disjointPattern = 0;
+            if (size == 3) {
+                disjointPattern += DataBase.puzzle3[0][stateCode[0]];
+                disjointPattern += DataBase.puzzle3[1][stateCode[1]];
+            } else if (size == 4) {
+                disjointPattern += DataBase.puzzle4[0][stateCode[0]];
+                disjointPattern += DataBase.puzzle4[1][stateCode[1]];
+                disjointPattern += DataBase.puzzle4[2][stateCode[2]];
+            }
+            this.heuristic = disjointPattern;
+        }
+        return this.heuristic;
+    }
+
+    private int[] getStateCode() {
+        int[] stateCode = new int[classes[size - 3]];
+        if (size == 3) {
+            for (int i = 0; i < size; ++i) {
+                for (int j = 0; j < size; ++j) {
+                    if (board[i][j] == 0) continue;
+                    stateCode[subSets[size - 3][board[i][j]]] += (i * size + j) *
+                            Math.pow(size * size, positions[size - 3][board[i][j]]);
+                }
+            }
+        } else {
+            for (int pos = size * size - 1; pos >= 0; --pos) {
+                final int i = goalTable[size-3][pos][0];
+                final int j = goalTable[size-3][pos][1];
+                final int value = board[i][j];
+
+                if (value != 0) {
+                    final int subsetNumber = subSets[size-3][value];
+
+                    switch (subsetNumber) {
+                        case 2 -> stateCode[2] |= pos << (positions[size - 3][value] << 2);
+                        case 1 -> stateCode[1] |= pos << (positions[size - 3][value] << 2);
+                        default -> stateCode[0] |= pos << (positions[size - 3][value] << 2);
+                    }
+                }
+            }
+        }
+
+
+
+        return stateCode;
     }
 
 

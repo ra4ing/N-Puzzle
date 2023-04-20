@@ -50,9 +50,13 @@ public final class SearchTester {
         for (HeuristicType heuristicType : heuristics) {
             //solveProblems方法根据不同启发函数生成不同的searcher
             //从Feeder获取所使用的搜索引擎（AStar，IDAStar等），
-
-//            solveProblems(problems, feeder.getAStar(heuristicType), heuristicType);
-            solveProblems(problems, feeder.getIdaStar(heuristicType), heuristicType);
+            if (step == 1) {
+                solveProblems(problems, feeder.getAStar(heuristicType), heuristicType);
+            } else if (step == 2) {
+                solveProblems(problems, feeder.getIdaStar(heuristicType), heuristicType);
+            } else if (step == 3) {
+                solveProblems(problems, feeder.getIdaStarWithDisjoint(heuristicType),heuristicType);
+            }
 //            solveProblems(problems, feeder.getBiAStar(heuristicType), heuristicType);
             System.out.println();
         }
@@ -74,15 +78,12 @@ public final class SearchTester {
             heuristics.add(PF_EUCLID);
         } else {
             //NPuzzle问题的第一阶段，使用不在位将牌和曼哈顿距离
-            if (step == 1) {
+            if (step == 1 || step == 2) {
 //                heuristics.add(MISPLACED);
                 heuristics.add(MANHATTAN);
+//                heuristics.add(DISJOINT_PATTERN);
 //                heuristics.add(MANLINEARCONFLICT);
 //                heuristics.add(EUCLID);
-//                heuristics.add(DISJOINT_PATTERN);
-            }
-            else if(step == 2) {
-                heuristics.add(MANHATTAN);
             }
             //NPuzzle问题的第三阶段，使用Disjoint Pattern
             else if (step == 3) {

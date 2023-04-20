@@ -4,11 +4,10 @@ public enum HeuristicType {
     //Npuzzle的启发函数
     MISPLACED,  // 不在位将牌
     MANHATTAN,  // 曼哈顿距离
-    MANLINEARCONFLICT, //曼哈顿 + 线性冲突
+    MANLINEAR_CONFLICT, //曼哈顿 + 线性冲突
     DISJOINT_PATTERN,
     EUCLID,
     MANHATTAN_FOR_BI,
-    NOTHING,
 
     //PathFinding的启发函数 (8方向的情况)
     PF_EUCLID,      // 欧几里得距离

@@ -5,11 +5,13 @@ import core.problem.Problem;
 import core.problem.State;
 import core.solver.queue.Node;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Deque;
+import java.util.Scanner;
 
 public class NPuzzleProblem extends Problem {
     private final int size;
-
 
     public NPuzzleProblem(PuzzleBoard initialState, PuzzleBoard goalState, int size) {
         super(initialState, goalState);
@@ -24,8 +26,8 @@ public class NPuzzleProblem extends Problem {
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if (((PuzzleBoard) initialState).getBoard()[i][j] != 0) {
-                    flattenedBoard[index++] = ((PuzzleBoard) initialState).getBoard()[i][j];
+                if (((PuzzleBoard) initialState).board[i][j] != 0) {
+                    flattenedBoard[index++] = ((PuzzleBoard) initialState).board[i][j];
                 }
             }
         }
@@ -62,12 +64,11 @@ public class NPuzzleProblem extends Problem {
         int step = 0;
         for (Node node : path) {
             System.out.println("Step " + step + ":");
-            if (node.getAction() != null)  node.getAction().draw();
+            if (node.getAction() != null) node.getAction().draw();
             node.getState().draw();
             step++;
         }
     }
-
 
     public static Node reverseAction(Node previousNode, Node currentNode) {
 
@@ -83,15 +84,15 @@ public class NPuzzleProblem extends Problem {
             // 根据空格位置的变化确定操作
             if (prevEmptyRow == currentEmptyRow) {
                 if (prevEmptyCol - currentEmptyCol == 1) {
-                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.W),currentNode.getPathCost());
+                    return new Node(currentNode.getState(), currentNode.getParent(), new Move(Direction.W), currentNode.getPathCost());
                 } else if (prevEmptyCol - currentEmptyCol == -1) {
-                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.E),currentNode.getPathCost());
+                    return new Node(currentNode.getState(), currentNode.getParent(), new Move(Direction.E), currentNode.getPathCost());
                 }
             } else if (prevEmptyCol == currentEmptyCol) {
                 if (prevEmptyRow - currentEmptyRow == 1) {
-                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.N),currentNode.getPathCost());
+                    return new Node(currentNode.getState(), currentNode.getParent(), new Move(Direction.N), currentNode.getPathCost());
                 } else if (prevEmptyRow - currentEmptyRow == -1) {
-                    return new Node(currentNode.getState(),currentNode.getParent(),new Move(Direction.S),currentNode.getPathCost());
+                    return new Node(currentNode.getState(), currentNode.getParent(), new Move(Direction.S), currentNode.getPathCost());
                 }
             }
         }
