@@ -4,7 +4,6 @@ import java.util.*;
 
 import core.problem.Problem;
 import core.problem.State;
-import core.solver.algorithm.heuristic.Predictor;
 import core.solver.algorithm.searcher.AbstractSearcher;
 import core.solver.queue.Frontier;
 import core.solver.queue.Node;
@@ -15,8 +14,6 @@ public final class BiAStar extends AbstractSearcher {
 
     private final Frontier forwardFrontier;
     private final Frontier reverseFrontier;
-    private final Predictor forwardPredictor;
-    private final Predictor reversePredictor;
     private final Set<State> reverseExplored;
     private final Set<State> forwardExplored;
     private final Map<State, Node> forwardStateNodeMap;
@@ -24,12 +21,10 @@ public final class BiAStar extends AbstractSearcher {
     private Problem problem;
     private int minIntersectionCost;
 
-    public BiAStar(Frontier forwardFrontier, Frontier reverseFrontier, Predictor forwardPredictor, Predictor reversePredictor) {
+    public BiAStar(Frontier forwardFrontier, Frontier reverseFrontier) {
         super(null);
         this.forwardFrontier = forwardFrontier;
         this.reverseFrontier = reverseFrontier;
-        this.forwardPredictor = forwardPredictor;
-        this.reversePredictor = reversePredictor;
         this.reverseExplored = new HashSet<>();
         this.forwardExplored = new HashSet<>();
         this.forwardStateNodeMap = new HashMap<>();
@@ -52,10 +47,10 @@ public final class BiAStar extends AbstractSearcher {
         nodesGenerated = 0;
         minIntersectionCost = Integer.MAX_VALUE;
 
-        Node root = problem.root(forwardPredictor);
+        Node root = problem.root();
         forwardFrontier.offer(root);
 
-        Node goalNode = problem.goalNode(reversePredictor);
+        Node goalNode = problem.goalNode();
         reverseFrontier.offer(goalNode);
 
         while (!forwardFrontier.isEmpty() || !reverseFrontier.isEmpty()) {
@@ -67,14 +62,14 @@ public final class BiAStar extends AbstractSearcher {
             }
 
             if (forwardNode != null) {
-                Deque<Node> forwardPath = searchHelper(forwardNode, reverseExplored, reverseStateNodeMap, forwardStateNodeMap, forwardExplored, forwardFrontier, forwardPredictor);
+                Deque<Node> forwardPath = searchHelper(forwardNode, reverseExplored, reverseStateNodeMap, forwardStateNodeMap, forwardExplored, forwardFrontier);
                 if (forwardPath != null) {
                     return forwardPath;
                 }
             }
 
             if (reverseNode != null) {
-                Deque<Node> reversePath = searchHelper(reverseNode, reverseExplored, forwardStateNodeMap, reverseStateNodeMap, reverseExplored, reverseFrontier, reversePredictor);
+                Deque<Node> reversePath = searchHelper(reverseNode, reverseExplored, forwardStateNodeMap, reverseStateNodeMap, reverseExplored, reverseFrontier);
                 if (reversePath != null) {
                     return reversePath;
                 }
@@ -85,7 +80,7 @@ public final class BiAStar extends AbstractSearcher {
         return null;
     }
 
-    private Deque<Node> searchHelper(Node node, Set<State> oppositeExplored, Map<State, Node> oppositeStateNodeMap, Map<State, Node> thisStateNodeMap, Set<State> thisExplored, Frontier thisFrontier, Predictor thisPredictor) {
+    private Deque<Node> searchHelper(Node node, Set<State> oppositeExplored, Map<State, Node> oppositeStateNodeMap, Map<State, Node> thisStateNodeMap, Set<State> thisExplored, Frontier thisFrontier) {
         if (oppositeExplored.contains(node.getState())) {
             Node intersectingNode = oppositeStateNodeMap.get(node.getState());
             int currentIntersectionCost = node.getPathCost() + intersectingNode.getPathCost();
@@ -103,7 +98,7 @@ public final class BiAStar extends AbstractSearcher {
         thisExplored.add(node.getState());
         thisStateNodeMap.put(node.getState(), node);
         // 对节点node进行扩展 Expansion
-        for (Node child : problem.childNodes(node, thisPredictor)) {
+        for (Node child : problem.childNodes(node, (state, goal) -> 0)) {
             nodesGenerated++;
             if (!thisExplored.contains(child.getState())) { // 如果新生成的节点（新扩展出的节点）还没有被扩展，则插入到frontier中。
                 thisFrontier.offer(child);

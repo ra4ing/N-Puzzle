@@ -6,10 +6,6 @@ public class SubBoard {
     private final int size;
     private int pathCost;
 
-    private static final int[][] next = {
-            {0, 1}, {1, 0}, {0, -1}, {-1, 0}
-    };
-
     public static final int[][] positions = {
             {-1, 0, 1, 2, 3, 0, 1, 2, 3},
             {-1, 0, 0, 1, 2, 1, 2, 0, 1, 3, 4, 2, 3, 5, 4, 5}};
@@ -30,7 +26,7 @@ public class SubBoard {
         for (int i = 0; i < this.n; i++) {
             this.points[i] = new Point(oldSubBoard.points[i]);
         }
-        this.pathCost = oldSubBoard.getPathCost();
+         this.pathCost = oldSubBoard.pathCost;
     }
 
     public int getN() {
@@ -99,7 +95,9 @@ public class SubBoard {
 
 
     public static class Point {
-        private int row, col, val;
+        private int row;
+        private int col;
+        private final int val;
 
         public Point(int row, int col, int val) {
             this.row = row;
@@ -131,10 +129,6 @@ public class SubBoard {
 
         public void setCol(int col) {
             this.col = col;
-        }
-
-        public void setVal(int val) {
-            this.val = val;
         }
     }
 }

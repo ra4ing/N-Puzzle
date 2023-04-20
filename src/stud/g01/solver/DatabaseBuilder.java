@@ -3,23 +3,16 @@ package stud.g01.solver;
 import stud.g01.problem.npuzzle.Direction;
 import stud.g01.problem.npuzzle.SubBoard;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.io.*;
 import java.util.*;
 
 public class DatabaseBuilder {
 
     private final int size;
-    private final int n;
     private final Queue<SubBoard> frontier = new ArrayDeque<>();
 
-    public DatabaseBuilder(int size, int n) {
+    public DatabaseBuilder(int size) {
         this.size = size;
-        this.n = n;
     }
 
     public int[] build(SubBoard root) {
@@ -30,15 +23,16 @@ public class DatabaseBuilder {
         explored.add(root.hashCode());
 
         SubBoard node, child;
-        int[] cost = new int[(int) Math.pow(size * size, n)];
+        int[] cost = new int[(int) Math.pow(size * size, root.getN())];
+        Arrays.fill(cost, -1);
 
         while (!frontier.isEmpty()) {
             node = frontier.poll();
 
-            for (int i=0; i<root.getN(); i++) {
+            for (int i = 0; i < root.getN(); i++) {
                 for (Direction d : Direction.FOUR_DIRECTIONS) {
-                    if (node.applicable(i,d)) {
-                        child = node.move(i,d);
+                    if (node.applicable(i, d)) {
+                        child = node.move(i, d);
                         if (!explored.contains(child.hashCode())) {
                             frontier.add(child);
                             explored.add(child.hashCode());
@@ -54,26 +48,29 @@ public class DatabaseBuilder {
     }
 
     private void save(int[] cost, String filename) {
-        Path filePath = Paths.get("resources", filename);
-
+        OutputStream os;
+        DataOutputStream dos = null;
         try {
-            if (!Files.exists(filePath)) {
-                Files.createFile(filePath);
+            os = new FileOutputStream(filename);
+            dos = new DataOutputStream(new BufferedOutputStream(os));
+            for (int value : cost) {
+                dos.writeByte(value);
             }
-
-            try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardOpenOption.WRITE)) {
-                for (int val : cost) {
-                    writer.write(val + "\t");
+        } catch (IOException ioe) {
+            System.err.println("Error: Cannot write to file " + filename + ".");
+            System.exit(1);
+        } finally {
+            try {
+                if (dos != null) {
+                    dos.close();
                 }
-                writer.write("\n");
+            } catch (IOException ignored) {
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     public static void buildPuzzle3() {
-        DatabaseBuilder dataBaseBuilder = new DatabaseBuilder(3, 4);
+        DatabaseBuilder dataBaseBuilder = new DatabaseBuilder(3);
         SubBoard.Point[] points1 = {
                 new SubBoard.Point(0, 0, 1),
                 new SubBoard.Point(0, 1, 2),
@@ -82,7 +79,8 @@ public class DatabaseBuilder {
         };
         SubBoard subBoard1 = new SubBoard(3, 4, points1);
         int[] cost1 = dataBaseBuilder.build(subBoard1);
-        dataBaseBuilder.save(cost1, "db3(1).txt");
+//        dataBaseBuilder.save(cost1, "db3_0.txt");
+        dataBaseBuilder.save(cost1, "resources/db3_0.db");
         System.out.println("---------Puzzle3 Part1 Completed---------");
         System.out.println();
 
@@ -94,7 +92,8 @@ public class DatabaseBuilder {
         };
         SubBoard subBoard2 = new SubBoard(3, 4, points2);
         int[] cost2 = dataBaseBuilder.build(subBoard2);
-        dataBaseBuilder.save(cost2, "db3(2).txt");
+//        dataBaseBuilder.save(cost2, "db3_1.txt");
+        dataBaseBuilder.save(cost2, "resources/db3_1.db");
         System.out.println("---------Puzzle3 Part2 Completed---------");
         System.out.println();
 
@@ -102,8 +101,19 @@ public class DatabaseBuilder {
     }
 
     public static void buildPuzzle4() {
-        DatabaseBuilder dataBaseBuilder = new DatabaseBuilder(4, 6);
+        DatabaseBuilder dataBaseBuilder = new DatabaseBuilder(4);
         SubBoard.Point[] points1 = {
+                new SubBoard.Point(0, 1, 2),
+                new SubBoard.Point(0, 2, 3),
+                new SubBoard.Point(0, 3, 4),
+        };
+        SubBoard subBoard1 = new SubBoard(4, 3, points1);
+        int[] cost1 = dataBaseBuilder.build(subBoard1);
+        dataBaseBuilder.save(cost1, "resources/db4_0.db");
+        System.out.println("---------Puzzle4 Part1 Completed---------");
+        System.out.println();
+
+        SubBoard.Point[] points2 = {
                 new SubBoard.Point(0, 0, 1),
                 new SubBoard.Point(1, 0, 5),
                 new SubBoard.Point(1, 1, 6),
@@ -111,13 +121,13 @@ public class DatabaseBuilder {
                 new SubBoard.Point(2, 1, 10),
                 new SubBoard.Point(3, 0, 13)
         };
-        SubBoard subBoard1 = new SubBoard(4, 6, points1);
-        int[] cost1 = dataBaseBuilder.build(subBoard1);
-        dataBaseBuilder.save(cost1, "db4(1).txt");
-        System.out.println("---------Puzzle4 Part1 Completed---------");
+        SubBoard subBoard2 = new SubBoard(4, 6, points2);
+        int[] cost2 = dataBaseBuilder.build(subBoard2);
+        dataBaseBuilder.save(cost2, "resources/db4_1.db");
+        System.out.println("---------Puzzle4 Part2 Completed---------");
         System.out.println();
 
-        SubBoard.Point[] points2 = {
+        SubBoard.Point[] points3 = {
                 new SubBoard.Point(1, 2, 7),
                 new SubBoard.Point(1, 3, 8),
                 new SubBoard.Point(2, 2, 11),
@@ -125,21 +135,10 @@ public class DatabaseBuilder {
                 new SubBoard.Point(3, 1, 14),
                 new SubBoard.Point(3, 2, 15)
         };
-        SubBoard subBoard2 = new SubBoard(4, 6, points2);
-        int[] cost2 = dataBaseBuilder.build(subBoard2);
-        dataBaseBuilder.save(cost2, "db4(2).txt");
-        System.out.println("---------Puzzle4 Part2 Completed---------");
-        System.out.println();
-
-        SubBoard.Point[] points3 = {
-                new SubBoard.Point(0, 1, 2),
-                new SubBoard.Point(0, 2, 3),
-                new SubBoard.Point(0, 3, 4),
-        };
-        SubBoard subBoard3 = new SubBoard(4, 3, points3);
+        SubBoard subBoard3 = new SubBoard(4, 6, points3);
         int[] cost3 = dataBaseBuilder.build(subBoard3);
-        dataBaseBuilder.save(cost3, "db4(3).txt");
-        System.out.println("---------Puzzle4 Part1 Completed---------");
+        dataBaseBuilder.save(cost3, "resources/db4_2.db");
+        System.out.println("---------Puzzle4 Part3 Completed---------");
         System.out.println();
 
 

@@ -56,8 +56,8 @@ public final class SearchTester {
                 solveProblems(problems, feeder.getIdaStar(heuristicType), heuristicType);
             } else if (step == 3) {
                 solveProblems(problems, feeder.getIdaStarWithDisjoint(heuristicType),heuristicType);
+//                solveProblems(problems, feeder.getBiAStar(heuristicType),heuristicType);
             }
-//            solveProblems(problems, feeder.getBiAStar(heuristicType), heuristicType);
             System.out.println();
         }
     }
@@ -88,6 +88,7 @@ public final class SearchTester {
             //NPuzzle问题的第三阶段，使用Disjoint Pattern
             else if (step == 3) {
                 heuristics.add(DISJOINT_PATTERN);
+//                heuristics.add(MANHATTAN);
             }
         }
         return heuristics;
@@ -116,7 +117,7 @@ public final class SearchTester {
             }
 
             // 解路径的可视化
-            problem.showSolution(path);
+//            problem.showSolution(path);
 
             System.out.println("启发函数：" + heuristicType + "，解路径长度：" + path.size() + "，执行了" + time1 + "s，" + "共生成了" + searcher.nodesGenerated() + "个结点，" + "扩展了" + searcher.nodesExpanded() + "个结点");
         }

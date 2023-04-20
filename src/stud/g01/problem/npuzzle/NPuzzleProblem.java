@@ -5,10 +5,7 @@ import core.problem.Problem;
 import core.problem.State;
 import core.solver.queue.Node;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.Deque;
-import java.util.Scanner;
 
 public class NPuzzleProblem extends Problem {
     private final int size;

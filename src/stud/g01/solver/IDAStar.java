@@ -59,6 +59,7 @@ public class IDAStar extends AbstractSearcher {
                     if (child.evaluation() <= bound) {
                         if ((node.getParent() == null || !node.getParent().equals(child))) {
                             priorityQueue.add(child);
+//                            stack.push(child);
                         }
 
                     } else {

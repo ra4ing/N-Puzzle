@@ -7,7 +7,6 @@ public enum HeuristicType {
     MANLINEAR_CONFLICT, //曼哈顿 + 线性冲突
     DISJOINT_PATTERN,
     EUCLID,
-    MANHATTAN_FOR_BI,
 
     //PathFinding的启发函数 (8方向的情况)
     PF_EUCLID,      // 欧几里得距离
