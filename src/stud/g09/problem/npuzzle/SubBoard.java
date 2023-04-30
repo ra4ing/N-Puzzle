@@ -1,15 +1,22 @@
-package stud.g01.problem.npuzzle;
+package stud.g09.problem.npuzzle;
 
 public class SubBoard {
-    public final Point[] points;
-    private final int n;
-    private final int size;
-    private int pathCost;
+    public final Point[] points; // 当前子棋盘上点的数组
+    private final int n; // 子棋盘上点的个数
+    private final int size; // 原始棋盘的大小
+    private int pathCost; // 子棋盘到达当前状态的路径成本
 
+    // 固定的位置数组，用于计算哈希值
     public static final int[][] positions = {
             {-1, 0, 1, 2, 3, 0, 1, 2, 3},
             {-1, 0, 0, 1, 2, 1, 2, 0, 1, 3, 4, 2, 3, 5, 4, 5}};
 
+    /**
+     * SubBoard 构造函数
+     * @param size 原始棋盘的大小
+     * @param n 子棋盘上点的个数
+     * @param points 子棋盘上点的数组
+     */
     public SubBoard(int size, int n, Point[] points) {
         this.n = n;
         this.size = size;
@@ -19,6 +26,10 @@ public class SubBoard {
         }
     }
 
+    /**
+     * 拷贝构造函数
+     * @param oldSubBoard 被拷贝的子棋盘
+     */
     public SubBoard(SubBoard oldSubBoard) {
         this.n = oldSubBoard.n;
         this.size = oldSubBoard.getSize();
@@ -41,6 +52,12 @@ public class SubBoard {
         return this.pathCost;
     }
 
+    /**
+     * 判断在给定方向上是否可以移动
+     * @param i 要移动的点的索引
+     * @param d 要移动的方向
+     * @return 若可以移动，返回 true；否则返回 false
+     */
     public boolean applicable(int i, Direction d) {
         int[] offsets = Direction.offset(d);
         int goRow = points[i].getRow() + offsets[0];
@@ -80,7 +97,12 @@ public class SubBoard {
         return false;
     }
 
-
+    /**
+     * 按给定方向移动点，并返回新的子棋盘状态
+     * @param i 要移动的点的索引
+     * @param d 要移动的方向
+     * @return 新的子棋盘状态
+     */
     public SubBoard move(int i, Direction d) {
         SubBoard state = new SubBoard(this);
         int[] offsets = Direction.offset(d);
@@ -94,10 +116,11 @@ public class SubBoard {
     }
 
 
+    // 不为0的值的位置信息
     public static class Point {
-        private int row;
-        private int col;
-        private final int val;
+        private int row; // 行数
+        private int col; // 列数
+        private final int val; // 值
 
         public Point(int row, int col, int val) {
             this.row = row;

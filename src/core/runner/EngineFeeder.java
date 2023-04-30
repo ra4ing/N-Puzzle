@@ -7,9 +7,9 @@ import core.solver.queue.EvaluationType;
 import core.solver.algorithm.heuristic.HeuristicType;
 import core.solver.algorithm.heuristic.Predictor;
 import core.solver.queue.Frontier;
-import stud.g01.problem.npuzzle.DataBase;
-import stud.g01.solver.BiAStar;
-import stud.g01.solver.IDAStar;
+import stud.g09.problem.npuzzle.DataBase;
+import stud.g09.solver.BiAStar;
+import stud.g09.solver.IDAStar;
 
 import java.util.ArrayList;
 
@@ -24,7 +24,7 @@ public abstract class EngineFeeder {
     /**
      * 根据存放问题输入样例的文本文件的内容，生成问题实例列表
      * @param problemLines  字符串数组，存放的是：问题输入样例的文本文件的内容
-     * @return
+     * @return 返回问题
      */
     public abstract ArrayList<Problem> getProblems(ArrayList<String> problemLines);
 
